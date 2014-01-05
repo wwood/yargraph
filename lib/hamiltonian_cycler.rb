@@ -54,11 +54,26 @@ module Hamiltonian
         end
       end
 
+      def length
+        count = 0
+        each do
+          count += 1
+        end
+        return count
+      end
+
       # Is there an edge between v1 and v2?
       def edge?(v1,v2)
         e = @edges[v1]
         return false if e.nil?
         return e.include?(v2)
+      end
+
+      def empty?
+        @edges.each do |v, neighbours|
+          return false unless neighbours.empty?
+        end
+        return true
       end
     end
 
