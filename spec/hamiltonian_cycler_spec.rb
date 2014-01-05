@@ -12,7 +12,25 @@ class GraphTesting
   def self.sorted_edges(edges)
     edges.collect{|edge| edge.sort}.sort
   end
+
+  # return an array of cycles the same as the original
+  # set, except that they have been rotated until so the min element
+  # is the first element
+  def self.sort_cycles(cycles)
+    cycles.collect do |cycle|
+      [cycle, cycle.reverse].collect do |cyc|
+        m = cyc.min
+        i = cyc.find_index(m)
+        cyc.rotate(i)
+      end.sort[0]
+    end
+  end
 end
+
+CYCLE_FINDING_METHODS = [
+  :hamiltonian_cycles_dynamic_programming,
+  :hamiltonian_cycles_brute_force,
+]
 
 describe "HamiltonianCycler" do
   it 'should do neighbours' do
@@ -37,10 +55,13 @@ describe "HamiltonianCycler" do
       [1,2],
       [2,0]
     ])
-    g.hamiltonian_cycles.sort.should == [
-      [0,1,2],
-      [0,2,1],
-    ].sort
+    CYCLE_FINDING_METHODS.each do |method|
+      cycles = GraphTesting.sort_cycles(g.send(method))
+      cycles.should == GraphTesting.sort_cycles([
+        [1,2,0],
+        [2,1,0],
+      ])
+    end
   end
 
   it "should find hamiltonian cycles 2" do
@@ -55,13 +76,34 @@ describe "HamiltonianCycler" do
       [5,6],
     ])
     paths = [
-      [1,2,4,5,6,3],
+      [2,4,5,6,3,1],
     ]
     revpaths = paths.collect do |path|
       (path[1..path.length]+[path[0]]).reverse
     end
-    g.hamiltonian_cycles.sort.should ==
-      (paths+revpaths).sort
+
+    CYCLE_FINDING_METHODS.each do |method|
+      GraphTesting.sort_cycles(g.send(method)).should ==
+        GraphTesting.sort_cycles(paths+revpaths)
+    end
+  end
+
+  it 'should operated within limits' do
+    g = GraphTesting.generate_undirected([
+      [1,2],
+      [1,3],
+      [2,4],
+      [2,3],
+      [3,6],
+      [4,5],
+      [4,6],
+      [5,6],
+    ])
+    CYCLE_FINDING_METHODS.each do |method|
+      expect {
+        g.send(method, 4)
+      }.to raise_error(Hamiltonian::OperationalLimitReachedException)
+    end
   end
 
   it 'should find edges in all hamiltonian cycles' do
@@ -84,22 +126,6 @@ describe "HamiltonianCycler" do
       [6,3],
       [3,1],
     ])
-  end
-
-  it 'should operated within limits' do
-    g = GraphTesting.generate_undirected([
-      [1,2],
-      [1,3],
-      [2,4],
-      [2,3],
-      [3,6],
-      [4,5],
-      [4,6],
-      [5,6],
-    ])
-    expect {
-      g.hamiltonian_cycles_brute_force(4)
-    }.to raise_error(Hamiltonian::OperationalLimitReachedException)
   end
 
   it 'should find some all-hamiltonian edges first' do

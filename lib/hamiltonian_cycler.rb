@@ -115,6 +115,10 @@ module Hamiltonian
       end
     end
 
+    def edge?(v1,v2)
+      @edges.edge?(v1,v2)
+    end
+
     def copy
       another = UndirectedGraph.new
       @vertices.each do |v|
@@ -182,7 +186,121 @@ module Hamiltonian
 
       return hamiltonians
     end
-    alias_method :hamiltonian_cycles, :hamiltonian_cycles_brute_force
+
+    # Use dynamic programming to find all the Hamiltonian cycles in this graph
+    def hamiltonian_cycles_dynamic_programming(operational_limit=nil)
+      stack = DS::Stack.new
+      return [] if @vertices.empty?
+
+      origin_vertex = @vertices.to_a[0]
+      hamiltonians = []
+      num_operations = 0
+
+      # This hash keeps track of subproblems that have already been
+      # solved. ie is there a path through vertices that ends in the
+      # endpoint
+      # Hash of [vertex_set,endpoint] => Array of Path objects.
+      # If no path is found, then the key is false
+      # The endpoint is not stored in the vertex set to make the programming
+      # easier.
+      dp_cache = {}
+
+      # First problem is the whole problem. We get the Hamiltonian paths,
+      # and then after reject those paths that are not cycles.
+      initial_vertex_set = Set.new(@vertices.reject{|v| v==origin_vertex})
+      initial_problem = [initial_vertex_set, origin_vertex]
+      stack.push initial_problem
+
+      while next_problem = stack.pop
+        vertices = next_problem[0]
+        destination = next_problem[1]
+
+        if dp_cache[next_problem]
+          # No need to do anything - problem already solved
+
+        elsif vertices.empty?
+          # The bottom of the problem. Only return a path
+          # if there is an edge between the destination and the origin
+          # node
+          if edge?(destination, origin_vertex)
+            path = Path.new [destination]
+            dp_cache[next_problem] = [path]
+          else
+            # Reached dead end
+            dp_cache[next_problem] = false
+          end
+
+        else
+          # This is an unsolved problem and there are at least 2 vertices in the vertex set.
+          # Work out which vertices in the set are neighbours
+          neighs = Set.new neighbours(destination)
+          possibilities = neighs.intersection(vertices)
+          if possibilities.length > 0
+            # There is still the possibility to go further into this unsolved problem
+            subproblems_unsolved = []
+            subproblems = []
+
+            possibilities.each do |new_destination|
+              new_vertex_set = Set.new(vertices.to_a.reject{|v| v==new_destination})
+              subproblem = [new_vertex_set, new_destination]
+
+              subproblems.push subproblem
+              if !dp_cache.key?(subproblem)
+                subproblems_unsolved.push subproblem
+              end
+            end
+
+            # if solved all the subproblems, then we can make a decision about this problem
+            if subproblems_unsolved.empty?
+              answers = []
+              subproblems.each do |problem|
+                paths = dp_cache[problem]
+                if paths == false
+                  # Nothing to see here
+                else
+                  # Add the found sub-paths to the set of answers
+                  paths.each do |path|
+                    answers.push Path.new(path+[destination])
+                  end
+                end
+              end
+
+              if answers.empty?
+                # No paths have been found here
+                dp_cache[next_problem] = false
+              else
+                dp_cache[next_problem] = answers
+              end
+            else
+              # More problems to be solved before a decision can be made
+              stack.push next_problem #We have only delayed solving this problem, need to keep going in the future
+              subproblems_unsolved.each do |prob|
+                unless operational_limit.nil?
+                  num_operations += 1
+                  raise OperationalLimitReachedException if num_operations > operational_limit
+                end
+                stack.push prob
+              end
+            end
+
+          else
+            # No neighbours in the set, so reached a dead end, can go no further
+            dp_cache[next_problem] = false
+          end
+        end
+      end
+
+      if block_given?
+        dp_cache[initial_problem].each do |hpath|
+          yield hpath
+        end
+        return
+      else
+        return dp_cache[initial_problem]
+      end
+    end
+    alias_method :hamiltonian_cycles, :hamiltonian_cycles_dynamic_programming
+
 
     # Return an array of edges (edges being an array of 2 vertices)
     # that correspond to edges that are found in all Hamiltonian paths.
