@@ -8,7 +8,7 @@ Yet another Ruby graphing library. Implements some (graph)[http://en.wikipedia.o
 
 Soon to be implemented:
 * finding (bridges)[http://en.wikipedia.org/wiki/Bridge_%28graph_theory%29] (```bridges```, requires linear time using Schmidt's (chain decompositions method)[http://dx.doi.org/10.1016%2Fj.ipl.2013.01.016])
-* determining (3-edge-connectivity)[http://en.wikipedia.org/wiki/K-edge-connected_graph] and if 3-edge-connected (but not 4-), determine which pairs of edges whose removal disconnects the graph (```three_edge_connected?```, ```three_edge_connections```, algorithm runs in O(n^2))
+* determining (3-edge-connectivity)[http://en.wikipedia.org/wiki/K-edge-connected_graph] and if 3-edge-connected (but not 4- or more), determine which pairs of edges whose removal disconnects the graph (```three_edge_connected?```, ```three_edge_connections```, algorithm runs in O(n^2))
 
 == Copyright
 Copyright (c) 2014 Ben J. Woodcroft. See LICENSE.txt for
