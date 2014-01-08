@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 class GraphTesting
   def self.generate_undirected(edges)
-    g = Hamiltonian::UndirectedGraph.new
+    g = Yargraph::UndirectedGraph.new
     edges.each do |edge|
       g.add_edge edge[0], edge[1]
     end
@@ -32,7 +32,7 @@ CYCLE_FINDING_METHODS = [
   :hamiltonian_cycles_brute_force,
 ]
 
-describe "HamiltonianCycler" do
+describe "Yargraph" do
   it 'should do neighbours' do
     g = GraphTesting.generate_undirected([
       [0,1],
@@ -102,7 +102,7 @@ describe "HamiltonianCycler" do
     CYCLE_FINDING_METHODS.each do |method|
       expect {
         g.send(method, 4)
-      }.to raise_error(Hamiltonian::OperationalLimitReachedException)
+      }.to raise_error(Yargraph::OperationalLimitReachedException)
     end
   end
 

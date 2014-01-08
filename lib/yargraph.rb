@@ -1,7 +1,7 @@
 require 'set'
 require 'ds'
 
-module Hamiltonian
+module Yargraph
   class OperationalLimitReachedException < Exception; end
 
   class UndirectedGraph
@@ -437,5 +437,18 @@ module Hamiltonian
         Path.new(self)
       end
     end
+
+#    # Return a "chain decomposition" as defined by Jens M. Schmidt, "A simple
+#    # test on 2-vertex- and 2-edge-connectivity"
+#    def chain_decomposition
+#    end
+#
+#    class ChainDecomposition
+#      # A Hash of edge objects (arrays of objects)objects. Each element of the array
+#      # is
+#      attr_accessor :edges_to_chainsets
+#
+#      def number_of_
+#    end
   end
 end
