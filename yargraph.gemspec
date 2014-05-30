@@ -28,7 +28,8 @@ Gem::Specification.new do |s|
     "VERSION",
     "lib/yargraph.rb",
     "spec/spec_helper.rb",
-    "spec/yargraph_spec.rb"
+    "spec/yargraph_spec.rb",
+    "yargraph.gemspec"
   ]
   s.homepage = "http://github.com/wwood/yargraph"
   s.licenses = ["MIT"]
