@@ -75,6 +75,31 @@ module Yargraph
         end
         return true
       end
+
+      def delete(v1,v2)
+        @edges[v1].delete v2
+        @edges[v2].delete v1
+
+        @edges.delete v1 if @edges[v1].empty?
+        @edges.delete v2 if @edges[v2].empty?
+      end
+
+      # Remove and return an arbitrary
+      # edge from the Set, or nil if there are no
+      # edges remaining.
+      # Returned is a 2 element Array of vertex1, vertex2
+      def pop
+        pp self
+        each do |v1, v2|
+          delete v1, v2
+          return [v1, v2]
+        end
+        return nil
+      end
+
+      def to_s
+        "EdgeSet: #{collect{|v1,v2| [v1,v2] }.join(',') }"
+      end
     end
 
 
