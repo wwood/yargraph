@@ -89,7 +89,6 @@ module Yargraph
       # edges remaining.
       # Returned is a 2 element Array of vertex1, vertex2
       def pop
-        pp self
         each do |v1, v2|
           delete v1, v2
           return [v1, v2]
